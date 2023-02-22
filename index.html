@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+{% block body %}
+
+<style>
+  
+  .typed {
+    overflow: hidden;
+    white-space: nowrap;
+    width: 0;
+    animation: typing;
+    animation-duration: 10s;
+    animation-timing-function: steps(200, end);
+    animation-fill-mode: linear infinite;
+  }
+    
+  @keyframes typing {
+    from { width: 0 }
+    to { width: 100% }
+  }
+  </style>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js">
+</script>
+<div class="container">
+  <p class="typed" style="height: 50px; font-size: large;">Welcome to our website ToDo</p>
+  <form action='/' method="POST">
+    <div class="mb-3">
+      <center><h1 style="background-color: rgb(80, 162, 255); border-radius: 15px;" >ToDo</h1></center>
+      <hr>
+      <label for="exampleInputEmail1" class="form-label">Title</label>
+      <input type="text" class="form-control" name="title" aria-describedby="emailHelp">
+    </div>
+    <div class="mb-3">
+      <label for="exampleInputPassword1" class="form-label">Description</label>
+      <input type="text" class="form-control" name="desc">
+    </div>
+    <div class="mb-3 form-check">
+      <input type="checkbox" class="form-check-input" id="exampleCheck1">
+      <label class="form-check-label" for="exampleCheck1">Check me out</label>
+    </div>
+    <button type="submit" class="btn btn-primary" style="background-color: rgb(80, 162, 255); border-radius: 15px; border: 0px;">Submit</button>
+  </form>
+</div>
+<br>
+<div class="container" >
+  <center><h1 style="background-color: rgb(80, 162, 255); border-radius: 15px;">List Of ToDo</h1></center>
+  <hr>
+  <br>
+  <table class="table" id="table">
+    <thead>
+      <tr>
+        <th scope="col">id</th>
+        <th scope="col">Title</th>
+        <th scope="col">Description</th>
+        <th scope="col">Created_date</th>
+        <th scope="col">Action</th>
+      </tr>
+    </thead>
+    <tbody id="table_body">
+      {% for i in data %}
+      <tr>
+        <th scope="row">{{ loop.index }}</th>
+        <td>{{i.title}}</td>
+        <td>{{i.description}}</td>
+        <td>{{i.created_date.date()}}</td>
+        <td><a type="button" class="fa fa-edit" style="border: 0px" href="/update/{{i.id}}"></a>
+          <a type="button" class="fa fa-trash"  style="border: 0px" href="/delete/{{i.id}}"></a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <center>
+    <h1 id="defaultPara" style="animation: typing 1s forwards;"></h1>
+  </center>
+</div>
+<script>
+  let search_text = document.getElementById("search");
+  search_text.addEventListener('input', function () {
+    var api_url = search_text.value;
+    const URL = "/search/" + api_url
+    async function getapi(url) {
+      // Storing response
+      const response = await fetch(url);
+      // Storing data in form of JSON
+      var data = await response.json();
+      for (var i = 0; i < data.length; i++) {
+      }
+      show(data);
+    }
+    getapi(URL);
+
+    function show(data) {
+      $("#table_body").empty();
+      $("#defaultPara").empty();
+      if (data.length > 0) {
+        for (var i = 0; i < data.length; i++) {
+          let objectDate = new Date(data[i].created_date);
+          let day = objectDate.getDate();
+          let month = objectDate.getMonth();
+          let year = objectDate.getFullYear();
+          let format = year + "-" + month + "-" + day;
+          var html = ''
+          html += "<tr>";
+          html += "<td>" + Number(i + 1) + "</td>";
+          html += "<td>" + data[i].title + "</td>";
+          html += "<td>" + data[i].description + "</td>";
+          html += "<td>" + format + "</td>";
+          html += "<td><a type='button' class='fa fa-edit' href='/update/" + data[i].id + "'></a>"
+          html += "<a type='button' class='fa fa-trash' href='/delete/" + data[i].id + "'></a></td>"
+          html += "</tr>";
+          $("#table_body").append(html);
+        }
+      }
+      else {
+        let para = document.getElementById('defaultPara').innerHTML = "Data not found"
+      }
+
+    }
+  });
+</script>
+{% endblock %}
